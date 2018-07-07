@@ -4,6 +4,9 @@ import java.io.*;
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.prefs.Preferences;
 import javax.imageio.ImageIO;
@@ -22,6 +25,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
     String strCurrentDirectory;
     List<File> imageFiles;
     ListIterator<File> imageIterator;
+    File currentImageFile;
     
     TreeMap<Integer, HotkeyDirectoryPair> mapKeyDirs;
     java.util.List<String> Hotkeys;
@@ -62,7 +66,8 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
         if(imageIterator.hasNext()){
             BufferedImage theImage = null;
             try{
-                theImage = ImageIO.read(imageIterator.next());
+                currentImageFile = imageIterator.next();
+                theImage = ImageIO.read(currentImageFile);
             }catch(IOException e){
                 e.printStackTrace();
             }
@@ -169,19 +174,49 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
         gl.replace(jPanel1, imagePanel);
         pack();
     }
-    private void DeleteImage() throws IOException{
-        //imagePanel.draw();
+    private void deleteImage() throws IOException{
+        imageIterator.remove();
+        updateFileCount();
+        currentImageFile.delete();
+        nextImage();
     }
     
-    private void MoveImage() throws IOException{
+    private void moveImage(char key) throws IOException{
+        // determine if key is actually a Hotkey
         
+        if(Hotkeys.contains(Character.toString(key))){
+            String hotKey = Character.toString(key);
+            int whichKey = Hotkeys.indexOf(hotKey);
+            String strTarget = mapKeyDirs.get(whichKey + 1).getDirectory() + '\\' + currentImageFile.getName();
+            
+          
+            if(!strTarget.equals(null)){
+                Path src = currentImageFile.toPath();
+                Path dest = (new File(strTarget)).toPath();
+                Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
+                System.out.println("Copied " + src.toString());
+                System.out.println("From:  " + dest.toString());
+                System.out.println("To:  " + strTarget);
+                
+                dest = (new File(strCurrentDirectory + "\\filed\\" + currentImageFile.getName())).toPath();
+                Files.move(src, dest, StandardCopyOption.REPLACE_EXISTING);
+                System.out.println("Moved " + src.toString());
+                System.out.println("From:  " + dest.toString());
+                System.out.println("To:  " + strTarget);
+                
+                imageIterator.remove();
+                updateFileCount();
+                nextImage();
+            }
+        }
     }
     
-    private void NextImage() throws IOException{
+    private void nextImage() throws IOException{
         if(imageIterator.hasNext()){
             BufferedImage theImage = null;
             try{
-                theImage = ImageIO.read(imageIterator.next());
+                currentImageFile = imageIterator.next();
+                theImage = ImageIO.read(currentImageFile);
             }catch(IOException e){
                 e.printStackTrace();
             }
@@ -191,11 +226,12 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
         }
     }
     
-    private void PreviousImage() throws IOException{
+    private void previousImage() throws IOException{
         if(imageIterator.hasPrevious()){
             BufferedImage theImage = null;
             try{
-                theImage = ImageIO.read(imageIterator.previous());
+                currentImageFile = imageIterator.previous();
+                theImage = ImageIO.read(currentImageFile);
             }catch(IOException e){
                 e.printStackTrace();
             }
@@ -236,7 +272,10 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
         }
     }
 
-    
+    private void updateFileCount(){
+        String strLabel = "# Images: " + imageFiles.size();
+        jLabelNumImages.setText(strLabel);
+    }
 
     private void jButtonSetDirectoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSetDirectoryActionPerformed
         JFileChooser chooser = new JFileChooser();
@@ -347,6 +386,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
     @Override
     public void keyPressed(KeyEvent ke) {
         
+        
         char c = ke.getKeyChar();
         int keyCode = ke.getKeyCode();
              
@@ -354,7 +394,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
             case KeyEvent.VK_BACK_SPACE:
             case KeyEvent.VK_DELETE:
                 try{
-                    DeleteImage();
+                    deleteImage();
                 }catch(IOException e){
                     e.printStackTrace();
                 }
@@ -362,7 +402,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
             case KeyEvent.VK_LEFT:
             case KeyEvent.VK_UP:
                 try{
-                    PreviousImage();
+                    previousImage();
                 }catch(IOException e){
                     e.printStackTrace();
                 }
@@ -370,12 +410,21 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
             case KeyEvent.VK_RIGHT:
             case KeyEvent.VK_DOWN:
                 try{
-                    NextImage();
+                    nextImage();
                 }catch(IOException e){
                     e.printStackTrace();
                 }
-                break;    
+                break;
+            case KeyEvent.VK_Z:
+                if(ke.isControlDown())
+                    System.out.println("Ctrl-Z typed");
+                break;
             default:
+               try{
+                   moveImage(c);
+               }catch(IOException e){
+                    e.printStackTrace();
+               } 
         }
     }
 }

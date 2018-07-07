@@ -28,5 +28,4 @@ public class HotkeyDirectoryPair {
         return strDirectory;
     }
     
-    
 }

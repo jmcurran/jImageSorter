@@ -231,6 +231,11 @@ public class SetClassesDlg extends javax.swing.JDialog {
                 String newHotkey = dlg.getSelectedKey();
                 model.setValueAt(newHotkey, row, col);
                 Hotkeys.set(row, newHotkey);
+                try{
+                    mapKeyDirs.replace(row + 1, new HotkeyDirectoryPair(newHotkey, mapKeyDirs.get(row + 1).getDirectory()));
+                }catch(InvalidHotkeyException e){
+                    e.printStackTrace();
+                }
             }
             
         }else if (col == 1) {
@@ -259,6 +264,11 @@ public class SetClassesDlg extends javax.swing.JDialog {
             if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 String curDir = fc.getSelectedFile().getAbsolutePath();
                 model.setValueAt(curDir, row, col);
+                try{
+                    mapKeyDirs.replace(row + 1, new HotkeyDirectoryPair(mapKeyDirs.get(row + 1).getHotkey(), curDir));
+                }catch(InvalidHotkeyException e){
+                    e.printStackTrace();
+                }
             }
         }
 
