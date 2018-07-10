@@ -49,7 +49,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
         Preferences prefs = Preferences.userNodeForPackage(this.getClass());
         strCurrentDirectory = prefs.get("CURRENT_WORKING_DIR", null);
 
-        if (strCurrentDirectory == null) {
+        if (strCurrentDirectory == null || !(new File(strCurrentDirectory)).exists()) {
             strCurrentDirectory = System.getProperty("user.home");
             File f = new File(strCurrentDirectory);
             strCurrentDirectory = f.getAbsolutePath();
