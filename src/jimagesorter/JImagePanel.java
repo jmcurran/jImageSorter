@@ -51,6 +51,20 @@ public class JImagePanel extends JPanel {
                     newWidth = (int)(heightScaleFactor * imageWidth);
                 }
                 
+                if(newHeight > panelHeight || newWidth > panelWidth){
+                    if(newHeight > panelHeight){
+                        double heightScaleFactor = (double)panelHeight / (double)newHeight;
+                        newHeight = panelHeight;
+                        newWidth = (int)(heightScaleFactor * newWidth);
+                    }
+                    
+                    if(newWidth > panelWidth){
+                        double widthScaleFactor = (double)panelWidth / (double)newWidth;
+                        newWidth = panelWidth;
+                        newHeight = (int)(widthScaleFactor * imageHeight);
+                    }
+                }
+                
                 Image scaledImage = img.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
                 int x = (panelWidth - newWidth) / 2;
                 int y = (panelHeight - newHeight) / 2;

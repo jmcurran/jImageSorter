@@ -1,5 +1,6 @@
 package jimagesorter;
 
+import java.awt.Component;
 import java.io.*;
 import javax.swing.*;
 import java.awt.event.*;
@@ -25,6 +26,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
     String strCurrentDirectory;
     List<File> imageFiles;
     ListIterator<File> imageIterator;
+    TreeMap<String, ImageResult> imageInfo;
     File currentImageFile;
     
     TreeMap<Integer, HotkeyDirectoryPair> mapKeyDirs;
@@ -63,16 +65,24 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
         String strLabel = "# Images: " + imageFiles.size();
         jLabelNumImages.setText(strLabel);
         
+        getImageInfo();
+        
         if(imageIterator.hasNext()){
             BufferedImage theImage = null;
             try{
                 currentImageFile = imageIterator.next();
+                this.setTitle(currentImageFile.getName());
                 theImage = ImageIO.read(currentImageFile);
             }catch(IOException e){
                 e.printStackTrace();
             }
             if(theImage != null){
                 imagePanel.drawImage(theImage);
+            }
+            
+            if(imageInfo != null){
+                String strResultLabel = imageInfo.get(currentImageFile.getName()).format();
+                jLabelImageInfo.setText(strResultLabel);               
             }
         }
         
@@ -92,6 +102,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
         jLabelCurrentDirectory = new javax.swing.JLabel();
         jLabelNumImages = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
+        jLabelImageInfo = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -130,17 +141,18 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabelCurrentDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, 458, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabelNumImages, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addComponent(jLabelNumImages, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(15, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(jButtonSetDirectory)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonSetClasses)
-                        .addGap(164, 164, 164)))
-                .addContainerGap(15, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabelImageInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
@@ -150,7 +162,8 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonSetDirectory)
-                    .addComponent(jButtonSetClasses))
+                    .addComponent(jButtonSetClasses)
+                    .addComponent(jLabelImageInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabelCurrentDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -198,7 +211,8 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
                 System.out.println("From:  " + dest.toString());
                 System.out.println("To:  " + strTarget);
                 
-                dest = (new File(strCurrentDirectory + "\\filed\\" + currentImageFile.getName())).toPath();
+                //dest = (new File(strCurrentDirectory + "\\filed\\" + currentImageFile.getName())).toPath();
+                dest = (new File("D:\\temp\\new\\filed\\" + currentImageFile.getName())).toPath();
                 Files.move(src, dest, StandardCopyOption.REPLACE_EXISTING);
                 System.out.println("Moved " + src.toString());
                 System.out.println("From:  " + dest.toString());
@@ -216,12 +230,18 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
             BufferedImage theImage = null;
             try{
                 currentImageFile = imageIterator.next();
+                this.setTitle(currentImageFile.getName());
                 theImage = ImageIO.read(currentImageFile);
             }catch(IOException e){
                 e.printStackTrace();
             }
             if(theImage != null){
                 imagePanel.drawImage(theImage);
+            }
+            
+            if(imageInfo != null){
+                String strResultLabel = imageInfo.get(currentImageFile.getName()).format();
+                jLabelImageInfo.setText(strResultLabel);
             }
         }
     }
@@ -231,6 +251,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
             BufferedImage theImage = null;
             try{
                 currentImageFile = imageIterator.previous();
+                this.setTitle(currentImageFile.getName());
                 theImage = ImageIO.read(currentImageFile);
             }catch(IOException e){
                 e.printStackTrace();
@@ -238,6 +259,32 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
             if(theImage != null){
                 imagePanel.drawImage(theImage);
             }
+            
+            if(imageInfo != null){
+                String strResultLabel = imageInfo.get(currentImageFile.getName()).format();
+                jLabelImageInfo.setText(strResultLabel);
+            }
+        }
+    }
+    
+    private void getImageInfo(){
+        File resultsFile = new File(strCurrentDirectory + "/results.csv");
+        
+        if(resultsFile.exists() && !resultsFile.isDirectory()){
+           try{
+               List<String> lines = Files.readAllLines(resultsFile.toPath());
+               ListIterator<String> i = lines.listIterator();
+               
+               imageInfo = new TreeMap<>();
+               while(i.hasNext()){
+                   ImageResult ir = new ImageResult(i.next());
+                   imageInfo.put(ir.getName(), ir);
+               }
+           }catch(IOException e){
+               e.printStackTrace();
+           } 
+        }else{
+            imageInfo = null;
         }
     }
     
@@ -280,8 +327,6 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
     private void jButtonSetDirectoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSetDirectoryActionPerformed
         JFileChooser chooser = new JFileChooser();
 
-        int result;
-
         chooser = new JFileChooser();
         chooser.setCurrentDirectory(new File(strCurrentDirectory));
         chooser.setDialogTitle("Select the image directory");
@@ -298,8 +343,29 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
             prefs.put("CURRENT_WORKING_DIR", strCurrentDirectory);
 
             imageFiles = getImageList();
+            imageIterator = imageFiles.listIterator();
             String strLabel = "# Images: " + imageFiles.size();
             jLabelNumImages.setText(strLabel);
+            
+            getImageInfo();
+
+            if(imageIterator.hasNext()){
+                BufferedImage theImage = null;
+                try{
+                    currentImageFile = imageIterator.next();
+                    theImage = ImageIO.read(currentImageFile);
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+                if(theImage != null){
+                    imagePanel.drawImage(theImage);
+                }
+                
+                if(imageInfo != null){
+                    String strResultLabel = imageInfo.get(currentImageFile.getName()).format();
+                    jLabelImageInfo.setText(strResultLabel);
+                }
+            }
 
 //            try {
 //                refreshImageStack();
@@ -311,6 +377,10 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
 //            }
 
         }
+        
+                
+        Component z = this.getFocusOwner();
+        this.requestFocus();
 
     }//GEN-LAST:event_jButtonSetDirectoryActionPerformed
 
@@ -371,6 +441,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
     private javax.swing.JButton jButtonSetClasses;
     private javax.swing.JButton jButtonSetDirectory;
     private javax.swing.JLabel jLabelCurrentDirectory;
+    private javax.swing.JLabel jLabelImageInfo;
     private javax.swing.JLabel jLabelNumImages;
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
