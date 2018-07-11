@@ -23,7 +23,9 @@ import javax.imageio.ImageIO;
  */
 public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
 
-    String strCurrentDirectory;
+    String strImageSourceDirectory;
+    String strFiledImageDirectory;
+    boolean bFileClassifiedImages;
     List<File> imageFiles;
     ListIterator<File> imageIterator;
     TreeMap<String, ImageResult> imageInfo;
@@ -47,18 +49,21 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
         setFocusTraversalKeysEnabled(false);
 
         Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-        strCurrentDirectory = prefs.get("CURRENT_WORKING_DIR", null);
+        strImageSourceDirectory = prefs.get("IMAGE_SOURCE_DIR", null);
 
-        if (strCurrentDirectory == null || !(new File(strCurrentDirectory)).exists()) {
-            strCurrentDirectory = System.getProperty("user.home");
-            File f = new File(strCurrentDirectory);
-            strCurrentDirectory = f.getAbsolutePath();
-            prefs.put("CURRENT_WORKING_DIR", strCurrentDirectory);
+        if (strImageSourceDirectory == null || !(new File(strImageSourceDirectory)).exists()) {
+            strImageSourceDirectory = System.getProperty("user.home");
+            File f = new File(strImageSourceDirectory);
+            strImageSourceDirectory = f.getAbsolutePath();
+            prefs.put("IMAGE_SOURCE_DIR", strImageSourceDirectory);
         }
+        
+        String strFileImages = prefs.get("FILE_IMAGES", null);
+        bFileClassifiedImages = (strFileImages != null) ? Boolean.parseBoolean(strFileImages) : false;
 
         loadHotkeys();
 
-        jLabelCurrentDirectory.setText(strCurrentDirectory);
+        jLabelImageSourceDirectory.setText(strImageSourceDirectory);
 
         imageFiles = getImageList();
         imageIterator = imageFiles.listIterator();
@@ -98,11 +103,16 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
     private void initComponents() {
 
         jButtonSetDirectory = new javax.swing.JButton();
-        jButtonSetClasses = new javax.swing.JButton();
-        jLabelCurrentDirectory = new javax.swing.JLabel();
+        jLabelImageSourceDirectory = new javax.swing.JLabel();
         jLabelNumImages = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         jLabelImageInfo = new javax.swing.JLabel();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuConfigure = new javax.swing.JMenu();
+        jMenuItemSetDirectories = new javax.swing.JMenuItem();
+        jMenuItemSetClasses = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -113,14 +123,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
             }
         });
 
-        jButtonSetClasses.setText("SetClasses");
-        jButtonSetClasses.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonSetClassesActionPerformed(evt);
-            }
-        });
-
-        jLabelCurrentDirectory.setText("jLabel1");
+        jLabelImageSourceDirectory.setText("jLabel1");
 
         jLabelNumImages.setText("# Images:");
 
@@ -132,8 +135,38 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 288, Short.MAX_VALUE)
+            .addGap(0, 266, Short.MAX_VALUE)
         );
+
+        jMenu1.setText("File");
+
+        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItem1.setText("Quit");
+        jMenu1.add(jMenuItem1);
+
+        jMenuBar1.add(jMenu1);
+
+        jMenuConfigure.setText("Configure");
+
+        jMenuItemSetDirectories.setText("Set Image Directories...");
+        jMenuItemSetDirectories.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemSetDirectoriesActionPerformed(evt);
+            }
+        });
+        jMenuConfigure.add(jMenuItemSetDirectories);
+
+        jMenuItemSetClasses.setText("Set Image Classes...");
+        jMenuItemSetClasses.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemSetClassesActionPerformed(evt);
+            }
+        });
+        jMenuConfigure.add(jMenuItemSetClasses);
+
+        jMenuBar1.add(jMenuConfigure);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -143,15 +176,13 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabelCurrentDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, 458, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabelImageSourceDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, 458, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabelNumImages, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap(15, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButtonSetDirectory)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonSetClasses)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(123, 123, 123)
                         .addComponent(jLabelImageInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -162,11 +193,10 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonSetDirectory)
-                    .addComponent(jButtonSetClasses)
                     .addComponent(jLabelImageInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabelCurrentDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabelImageSourceDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabelNumImages)))
         );
 
@@ -211,7 +241,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
                 System.out.println("From:  " + dest.toString());
                 System.out.println("To:  " + strTarget);
                 
-                //dest = (new File(strCurrentDirectory + "\\filed\\" + currentImageFile.getName())).toPath();
+                //dest = (new File(strImageSourceDirectory + "\\filed\\" + currentImageFile.getName())).toPath();
                 dest = (new File("D:\\temp\\new\\filed\\" + currentImageFile.getName())).toPath();
                 Files.move(src, dest, StandardCopyOption.REPLACE_EXISTING);
                 System.out.println("Moved " + src.toString());
@@ -268,7 +298,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
     }
     
     private void getImageInfo(){
-        File resultsFile = new File(strCurrentDirectory + "/results.csv");
+        File resultsFile = new File(strImageSourceDirectory + "/results.csv");
         
         if(resultsFile.exists() && !resultsFile.isDirectory()){
            try{
@@ -289,7 +319,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
     }
     
     private List<File> getImageList() {
-        File dir = new File(strCurrentDirectory);
+        File dir = new File(strImageSourceDirectory);
         File[] files = dir.listFiles((File directory, String fileName) -> fileName.toLowerCase().endsWith(".jpg"));
 
         return new ArrayList<>(Arrays.asList(files));
@@ -325,10 +355,15 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
     }
 
     private void jButtonSetDirectoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSetDirectoryActionPerformed
+        
+
+    }//GEN-LAST:event_jButtonSetDirectoryActionPerformed
+
+    private void jMenuItemSetDirectoriesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSetDirectoriesActionPerformed
         JFileChooser chooser = new JFileChooser();
 
         chooser = new JFileChooser();
-        chooser.setCurrentDirectory(new File(strCurrentDirectory));
+        chooser.setCurrentDirectory(new File(strImageSourceDirectory));
         chooser.setDialogTitle("Select the image directory");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         //
@@ -337,10 +372,10 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
         chooser.setAcceptAllFileFilterUsed(false);
         //    
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            strCurrentDirectory = chooser.getSelectedFile().getAbsolutePath();
-            jLabelCurrentDirectory.setText(strCurrentDirectory);
+            strImageSourceDirectory = chooser.getSelectedFile().getAbsolutePath();
+            jLabelImageSourceDirectory.setText(strImageSourceDirectory);
             Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-            prefs.put("CURRENT_WORKING_DIR", strCurrentDirectory);
+            prefs.put("CURRENT_WORKING_DIR", strImageSourceDirectory);
 
             imageFiles = getImageList();
             imageIterator = imageFiles.listIterator();
@@ -381,11 +416,12 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
                 
         Component z = this.getFocusOwner();
         this.requestFocus();
+        
+        
+    }//GEN-LAST:event_jMenuItemSetDirectoriesActionPerformed
 
-    }//GEN-LAST:event_jButtonSetDirectoryActionPerformed
-
-    private void jButtonSetClassesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSetClassesActionPerformed
-        SetClassesDlg dlg = new SetClassesDlg(this, true, mapKeyDirs, strCurrentDirectory);
+    private void jMenuItemSetClassesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSetClassesActionPerformed
+        SetClassesDlg dlg = new SetClassesDlg(this, true, mapKeyDirs, strImageSourceDirectory);
         dlg.pack();
         dlg.setVisible(true);
 
@@ -402,7 +438,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
                 prefs.put(strDirKey, mapKeyDirs.get(i).getDirectory());
             }
         }
-    }//GEN-LAST:event_jButtonSetClassesActionPerformed
+    }//GEN-LAST:event_jMenuItemSetClassesActionPerformed
 
     /**
      * @param args the command line arguments
@@ -438,11 +474,16 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener{
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButtonSetClasses;
     private javax.swing.JButton jButtonSetDirectory;
-    private javax.swing.JLabel jLabelCurrentDirectory;
     private javax.swing.JLabel jLabelImageInfo;
+    private javax.swing.JLabel jLabelImageSourceDirectory;
     private javax.swing.JLabel jLabelNumImages;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenu jMenuConfigure;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItemSetClasses;
+    private javax.swing.JMenuItem jMenuItemSetDirectories;
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 
