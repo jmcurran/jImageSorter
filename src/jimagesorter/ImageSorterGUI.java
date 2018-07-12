@@ -1,6 +1,7 @@
 package jimagesorter;
 
 import java.awt.Component;
+import java.awt.Toolkit;
 import java.io.*;
 import javax.swing.*;
 import java.awt.event.*;
@@ -94,7 +95,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
         jPanel1 = new javax.swing.JPanel();
         jLabelImageInfo = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
+        jMenuFile = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenuConfigure = new javax.swing.JMenu();
         jMenuItemSetDirectories = new javax.swing.JMenuItem();
@@ -117,16 +118,22 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
             .addGap(0, 266, Short.MAX_VALUE)
         );
 
-        jMenu1.setText("File");
+        jMenuFile.setText("File");
 
-        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         jMenuItem1.setText("Quit");
-        jMenu1.add(jMenuItem1);
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenuFile.add(jMenuItem1);
 
-        jMenuBar1.add(jMenu1);
+        jMenuBar1.add(jMenuFile);
 
         jMenuConfigure.setText("Configure");
 
+        jMenuItemSetDirectories.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         jMenuItemSetDirectories.setText("Set Image Directories...");
         jMenuItemSetDirectories.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -135,6 +142,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
         });
         jMenuConfigure.add(jMenuItemSetDirectories);
 
+        jMenuItemSetClasses.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         jMenuItemSetClasses.setText("Set Image Classes...");
         jMenuItemSetClasses.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -428,6 +436,10 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
         }
     }//GEN-LAST:event_jMenuItemSetClassesActionPerformed
 
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        System.exit(0);
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -473,9 +485,9 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
     private javax.swing.JLabel jLabelImageInfo;
     private javax.swing.JLabel jLabelImageSourceDirectory;
     private javax.swing.JLabel jLabelNumImages;
-    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenu jMenuConfigure;
+    private javax.swing.JMenu jMenuFile;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItemSetClasses;
     private javax.swing.JMenuItem jMenuItemSetDirectories;
