@@ -78,8 +78,7 @@
                       <EmptySpace pref="15" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" attributes="0">
-                      <Component id="jButtonSetDirectory" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="123" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="248" max="-2" attributes="0"/>
                       <Component id="jLabelImageInfo" max="32767" attributes="0"/>
                   </Group>
               </Group>
@@ -92,10 +91,7 @@
           <Group type="102" alignment="1" attributes="0">
               <Component id="jPanel1" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jButtonSetDirectory" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jLabelImageInfo" max="32767" attributes="0"/>
-              </Group>
+              <Component id="jLabelImageInfo" pref="29" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabelImageSourceDirectory" alignment="3" min="-2" pref="26" max="-2" attributes="0"/>
@@ -106,14 +102,6 @@
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Component class="javax.swing.JButton" name="jButtonSetDirectory">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Set Directory"/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonSetDirectoryActionPerformed"/>
-      </Events>
-    </Component>
     <Component class="javax.swing.JLabel" name="jLabelImageSourceDirectory">
       <Properties>
         <Property name="text" type="java.lang.String" value="jLabel1"/>

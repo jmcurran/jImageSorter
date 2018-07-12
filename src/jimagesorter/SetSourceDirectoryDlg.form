@@ -23,7 +23,7 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="jCheckBox1" min="-2" max="-2" attributes="0"/>
+          <Component id="jCheckBoxFileImages" min="-2" max="-2" attributes="0"/>
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
@@ -39,7 +39,7 @@
                           <Component id="jButtonSetImageSourceDirectory" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <Group type="102" alignment="0" attributes="0">
-                          <Component id="jLabelFiledImageDirectory" min="-2" pref="262" max="-2" attributes="0"/>
+                          <Component id="jLabelFiledImageDir" min="-2" pref="262" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jButtonSetFiledImageDirectory" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -67,12 +67,12 @@
                   <Component id="jButtonSetImageSourceDirectory" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jCheckBox1" min="-2" max="-2" attributes="0"/>
+              <Component id="jCheckBoxFileImages" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Component id="jLabel3" min="-2" pref="16" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jLabelFiledImageDirectory" alignment="3" min="-2" pref="26" max="-2" attributes="0"/>
+                  <Component id="jLabelFiledImageDir" alignment="3" min="-2" pref="26" max="-2" attributes="0"/>
                   <Component id="jButtonSetFiledImageDirectory" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
@@ -92,33 +92,45 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Set..."/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonSetImageSourceDirectoryActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel2">
       <Properties>
         <Property name="text" type="java.lang.String" value="Image Source Directory"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JCheckBox" name="jCheckBox1">
+    <Component class="javax.swing.JCheckBox" name="jCheckBoxFileImages">
       <Properties>
         <Property name="text" type="java.lang.String" value="File images after categorization"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jCheckBoxFileImagesActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel3">
       <Properties>
         <Property name="text" type="java.lang.String" value="Filed Image Directory"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JLabel" name="jLabelFiledImageDirectory">
+    <Component class="javax.swing.JLabel" name="jLabelFiledImageDir">
     </Component>
     <Component class="javax.swing.JButton" name="jButtonSetFiledImageDirectory">
       <Properties>
         <Property name="text" type="java.lang.String" value="Set..."/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonSetFiledImageDirectoryActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="jButtonOK">
       <Properties>
         <Property name="text" type="java.lang.String" value="OK"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonOKActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="jButtonCancel">
       <Properties>

@@ -5,11 +5,27 @@
  */
 package jimagesorter;
 
+import java.awt.Frame;
+import java.io.File;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+
 /**
  *
  * @author jcur002
  */
 public class SetSourceDirectoryDlg extends javax.swing.JDialog {
+
+    String strImageSourceDirectory;
+    String strFiledImageDirectory;
+    boolean bFileImages;
+
+    public enum DialogResult {
+        OK_OPTION,
+        CANCEL_OPTION
+    }
+
+    DialogResult result;
 
     /**
      * Creates new form SetSourceDirectoryDlg
@@ -17,6 +33,31 @@ public class SetSourceDirectoryDlg extends javax.swing.JDialog {
     public SetSourceDirectoryDlg(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+    }
+
+    public SetSourceDirectoryDlg(String strImageSourceDirectory, String strFiledImageDirectory, boolean bFileImages, Frame parent, boolean modal) {
+        super(parent, modal);
+        initComponents();
+        
+        this.strImageSourceDirectory = strImageSourceDirectory;
+        this.strFiledImageDirectory = strFiledImageDirectory;
+        this.bFileImages = bFileImages;
+        
+        
+
+        jLabelImageSourceDir.setText(this.strImageSourceDirectory);
+        jLabelFiledImageDir.setText(this.strFiledImageDirectory);
+        jCheckBoxFileImages.setSelected(this.bFileImages);
+
+        if (!bFileImages) {
+            jLabelFiledImageDir.setEnabled(false);
+            jButtonSetFiledImageDirectory.setEnabled(false);
+        }else{
+            jLabelFiledImageDir.setEnabled(true);
+            jButtonSetFiledImageDirectory.setEnabled(true);
+        }
+
+        result = DialogResult.CANCEL_OPTION;
     }
 
     /**
@@ -31,9 +72,9 @@ public class SetSourceDirectoryDlg extends javax.swing.JDialog {
         jLabelImageSourceDir = new javax.swing.JLabel();
         jButtonSetImageSourceDirectory = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
-        jCheckBox1 = new javax.swing.JCheckBox();
+        jCheckBoxFileImages = new javax.swing.JCheckBox();
         jLabel3 = new javax.swing.JLabel();
-        jLabelFiledImageDirectory = new javax.swing.JLabel();
+        jLabelFiledImageDir = new javax.swing.JLabel();
         jButtonSetFiledImageDirectory = new javax.swing.JButton();
         jButtonOK = new javax.swing.JButton();
         jButtonCancel = new javax.swing.JButton();
@@ -41,16 +82,36 @@ public class SetSourceDirectoryDlg extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jButtonSetImageSourceDirectory.setText("Set...");
+        jButtonSetImageSourceDirectory.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonSetImageSourceDirectoryActionPerformed(evt);
+            }
+        });
 
         jLabel2.setText("Image Source Directory");
 
-        jCheckBox1.setText("File images after categorization");
+        jCheckBoxFileImages.setText("File images after categorization");
+        jCheckBoxFileImages.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBoxFileImagesActionPerformed(evt);
+            }
+        });
 
         jLabel3.setText("Filed Image Directory");
 
         jButtonSetFiledImageDirectory.setText("Set...");
+        jButtonSetFiledImageDirectory.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonSetFiledImageDirectoryActionPerformed(evt);
+            }
+        });
 
         jButtonOK.setText("OK");
+        jButtonOK.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonOKActionPerformed(evt);
+            }
+        });
 
         jButtonCancel.setText("Cancel");
         jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
@@ -63,7 +124,7 @@ public class SetSourceDirectoryDlg extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jCheckBox1)
+            .addComponent(jCheckBoxFileImages)
             .addGroup(layout.createSequentialGroup()
                 .addGap(34, 34, 34)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -77,7 +138,7 @@ public class SetSourceDirectoryDlg extends javax.swing.JDialog {
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addComponent(jButtonSetImageSourceDirectory))
                         .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                            .addComponent(jLabelFiledImageDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabelFiledImageDir, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addComponent(jButtonSetFiledImageDirectory)))))
             .addGroup(layout.createSequentialGroup()
@@ -97,12 +158,12 @@ public class SetSourceDirectoryDlg extends javax.swing.JDialog {
                     .addComponent(jLabelImageSourceDir, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonSetImageSourceDirectory))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jCheckBox1)
+                .addComponent(jCheckBoxFileImages)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabelFiledImageDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabelFiledImageDir, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonSetFiledImageDirectory))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -115,8 +176,85 @@ public class SetSourceDirectoryDlg extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
-        // TODO add your handling code here:
+        this.setVisible(false);
+        result = DialogResult.CANCEL_OPTION;
     }//GEN-LAST:event_jButtonCancelActionPerformed
+
+    private void jButtonOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOKActionPerformed
+        this.setVisible(false);
+        result = DialogResult.OK_OPTION;
+    }//GEN-LAST:event_jButtonOKActionPerformed
+
+    private void jButtonSetFiledImageDirectoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSetFiledImageDirectoryActionPerformed
+        JFileChooser fc;
+
+        fc = new JFileChooser();
+        fc.setCurrentDirectory(new File(strFiledImageDirectory));
+        fc.setDialogTitle("Select the directory for filed images");
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fc.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.isDirectory();
+            }
+
+            @Override
+            public String getDescription() {
+                return "Any folder";
+            }
+
+        });
+
+        fc.setDialogType(JFileChooser.SAVE_DIALOG);
+        fc.setApproveButtonText("Select");
+        //    
+        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            String theDir = fc.getSelectedFile().getAbsolutePath();
+            strImageSourceDirectory = theDir;
+            jLabelImageSourceDir.setText(strImageSourceDirectory);
+        }
+    }//GEN-LAST:event_jButtonSetFiledImageDirectoryActionPerformed
+
+    private void jButtonSetImageSourceDirectoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSetImageSourceDirectoryActionPerformed
+        JFileChooser fc;
+
+        fc = new JFileChooser();
+        fc.setCurrentDirectory(new File(strImageSourceDirectory));
+        fc.setDialogTitle("Select the directory for unclassified images");
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fc.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.isDirectory();
+            }
+
+            @Override
+            public String getDescription() {
+                return "Any folder";
+            }
+
+        });
+
+        fc.setDialogType(JFileChooser.SAVE_DIALOG);
+        fc.setApproveButtonText("Select");
+        //    
+        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            String theDir = fc.getSelectedFile().getAbsolutePath();
+            this.strImageSourceDirectory = theDir;
+        }
+    }//GEN-LAST:event_jButtonSetImageSourceDirectoryActionPerformed
+
+    private void jCheckBoxFileImagesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxFileImagesActionPerformed
+        bFileImages = !bFileImages;
+        
+        if (!bFileImages) {
+            jLabelFiledImageDir.setEnabled(false);
+            jButtonSetFiledImageDirectory.setEnabled(false);
+        }else{
+            jLabelFiledImageDir.setEnabled(true);
+            jButtonSetFiledImageDirectory.setEnabled(true);
+        }
+    }//GEN-LAST:event_jCheckBoxFileImagesActionPerformed
 
     /**
      * @param args the command line arguments
@@ -165,10 +303,10 @@ public class SetSourceDirectoryDlg extends javax.swing.JDialog {
     private javax.swing.JButton jButtonOK;
     private javax.swing.JButton jButtonSetFiledImageDirectory;
     private javax.swing.JButton jButtonSetImageSourceDirectory;
-    private javax.swing.JCheckBox jCheckBox1;
+    private javax.swing.JCheckBox jCheckBoxFileImages;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabelFiledImageDirectory;
+    private javax.swing.JLabel jLabelFiledImageDir;
     private javax.swing.JLabel jLabelImageSourceDir;
     // End of variables declaration//GEN-END:variables
 }
