@@ -215,7 +215,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
         if (Hotkeys.contains(Character.toString(key))) {
             String hotKey = Character.toString(key);
             int whichKey = Hotkeys.indexOf(hotKey);
-            String strTarget = mapKeyDirs.get(whichKey + 1).getDirectory() + '\\' + currentImageFile.getName();
+            String strTarget = mapKeyDirs.get(whichKey + 1).getDirectory() + File.separator + currentImageFile.getName();
 
             if (!strTarget.equals(null)) {
                 Path src = currentImageFile.toPath();
@@ -226,7 +226,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
                 System.out.println("To:  " + strTarget);
 
                 if(bFileClassifiedImages){
-                    dest = (new File(strFiledImageDirectory + currentImageFile.getName())).toPath();
+                    dest = (new File(strFiledImageDirectory + File.separator + currentImageFile.getName())).toPath();
                     Files.move(src, dest, StandardCopyOption.REPLACE_EXISTING);
                     System.out.println("Moved " + src.toString());
                     System.out.println("From:  " + dest.toString());
@@ -315,7 +315,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
     }
 
     private void getImageInfo() {
-        File resultsFile = new File(strImageSourceDirectory + "/results.csv");
+        File resultsFile = new File(strImageSourceDirectory + File.separator + "results.csv");
 
         if (resultsFile.exists() && !resultsFile.isDirectory()) {
             try {

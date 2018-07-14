@@ -211,8 +211,8 @@ public class SetSourceDirectoryDlg extends javax.swing.JDialog {
         //    
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             String theDir = fc.getSelectedFile().getAbsolutePath();
-            strImageSourceDirectory = theDir;
-            jLabelImageSourceDir.setText(strImageSourceDirectory);
+            strFiledImageDirectory = theDir;
+            jLabelFiledImageDir.setText(strFiledImageDirectory);
         }
     }//GEN-LAST:event_jButtonSetFiledImageDirectoryActionPerformed
 
