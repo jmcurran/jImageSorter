@@ -31,6 +31,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
     ListIterator<File> imageIterator;
     TreeMap<String, ImageResult> imageInfo;
     File currentImageFile;
+    List<FileMoveRecord> undoList;
 
     TreeMap<Integer, HotkeyDirectoryPair> mapKeyDirs;
     java.util.List<String> Hotkeys;
@@ -50,6 +51,8 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
 
         getDirectoryPrefs();
         getHotkeyClassPrefs();
+        
+        undoList = new ArrayList<>();
 
         jLabelImageSourceDirectory.setText(strImageSourceDirectory);
 
@@ -97,6 +100,8 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuEdit = new javax.swing.JMenu();
+        jMenuItemUndo = new javax.swing.JMenuItem();
         jMenuConfigure = new javax.swing.JMenu();
         jMenuItemSetDirectories = new javax.swing.JMenuItem();
         jMenuItemSetClasses = new javax.swing.JMenuItem();
@@ -130,6 +135,19 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
         jMenuFile.add(jMenuItem1);
 
         jMenuBar1.add(jMenuFile);
+
+        jMenuEdit.setText("Edit");
+
+        jMenuItemUndo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        jMenuItemUndo.setText("Undo");
+        jMenuItemUndo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemUndoActionPerformed(evt);
+            }
+        });
+        jMenuEdit.add(jMenuItemUndo);
+
+        jMenuBar1.add(jMenuEdit);
 
         jMenuConfigure.setText("Configure");
 
@@ -212,26 +230,47 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
     private void moveImage(char key) throws IOException {
         // determine if key is actually a Hotkey
 
-        if (Hotkeys.contains(Character.toString(key))) {
-            String hotKey = Character.toString(key);
-            int whichKey = Hotkeys.indexOf(hotKey);
+        if (Hotkeys.contains(Character.toString(key)) || key == ' ') {
+            String hotKey = (key != ' ') ? Character.toString(key) : "default";
+            int whichKey = (key != ' ') ? Hotkeys.indexOf(hotKey) : 10;
             String strTarget = mapKeyDirs.get(whichKey + 1).getDirectory() + File.separator + currentImageFile.getName();
+            
+            if(key == ' ' & strTarget.equals(null)){
+                JOptionPane.showMessageDialog(this, "The default class directory hasn't been set.", "Non-critical error", JOptionPane.ERROR_MESSAGE);
+            }
 
             if (!strTarget.equals(null)) {
                 Path src = currentImageFile.toPath();
                 Path dest = (new File(strTarget)).toPath();
-                Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("Copied " + src.toString());
+                if(!bFileClassifiedImages){
+                    Files.move(src, dest, StandardCopyOption.REPLACE_EXISTING);
+                    System.out.println("CLASS: Moved " + src.toString());
+                }else{
+                    Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
+                    System.out.println("CLASS: Copied " + src.toString());
+                }
+                
                 System.out.println("From:  " + dest.toString());
                 System.out.println("To:  " + strTarget);
+                if(!bFileClassifiedImages){
+                    System.out.println("-----");
+                }
+                
+                FileMoveRecord fmr = new FileMoveRecord(src, dest);
 
                 if(bFileClassifiedImages){
-                    dest = (new File(strFiledImageDirectory + File.separator + currentImageFile.getName())).toPath();
+                    String strFiledTarget = strFiledImageDirectory + File.separator + currentImageFile.getName();
+                    dest = (new File(strFiledTarget)).toPath();
                     Files.move(src, dest, StandardCopyOption.REPLACE_EXISTING);
-                    System.out.println("Moved " + src.toString());
+                    System.out.println("FILE: Moved " + src.toString());
                     System.out.println("From:  " + dest.toString());
                     System.out.println("To:  " + strTarget);
+                    System.out.println("-----");
+                    
+                    fmr.add(dest);
                 }
+                
+                undoList.add(fmr);
 
                 imageIterator.remove();
                 updateFileCount();
@@ -348,20 +387,52 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
 
         Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 11; i++) {
             String suffix = ((i < 10) ? Integer.toString(i) : "0");
-            String strHotkeyKey = "KEY" + suffix;
-            String strDirKey = "DIR" + suffix;
+            String strHotkeyKey = (i < 10) ? "KEY" + suffix : "default";
+            String strDirKey = "DIR" + ((i <= 10) ? suffix : "_DEFAULT");
 
-            String strHotkeyValue = prefs.get(strHotkeyKey, suffix);
             String strDirValue = prefs.get(strDirKey, null);
 
-            Hotkeys.add(strHotkeyValue);
-
+            String strHotkeyValue = (i <= 10) ? prefs.get(strHotkeyKey, suffix) : null;
+            if(strHotkeyValue != null)
+                Hotkeys.add(strHotkeyValue);
+            
             try {
-                mapKeyDirs.put(i, new HotkeyDirectoryPair(strHotkeyValue, strDirValue));
+                if(i <= 10){
+                    mapKeyDirs.put(i, new HotkeyDirectoryPair(strHotkeyValue, strDirValue));
+                }else{
+                    mapKeyDirs.put(i, new HotkeyDirectoryPair("default", strDirValue));
+                }
             } catch (InvalidHotkeyException e) {
                 System.out.println(e.getMessage());
+            }
+        }
+    }
+    
+    public void refreshImageList(){
+        imageFiles = getImageList();            
+        imageIterator = imageFiles.listIterator();
+        String strLabel = "# Images: " + imageFiles.size();
+        jLabelNumImages.setText(strLabel);
+
+        getImageInfo();
+
+        if(imageIterator.hasNext()){
+            BufferedImage theImage = null;
+            try{
+                currentImageFile = imageIterator.next();
+                theImage = ImageIO.read(currentImageFile);
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+            if(theImage != null){
+                imagePanel.drawImage(theImage);
+            }
+
+            if(imageInfo != null){
+                String strResultLabel = imageInfo.get(currentImageFile.getName()).format();
+                jLabelImageInfo.setText(strResultLabel);
             }
         }
     }
@@ -425,10 +496,10 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
             Preferences prefs = Preferences.userNodeForPackage(this.getClass());
             mapKeyDirs.putAll(dlg.getData());
 
-            for (int i = 1; i <= 10; i++) {
+            for (int i = 1; i <= 11; i++) {
                 String suffix = ((i < 10) ? Integer.toString(i) : "0");
                 String strHotkeyKey = "KEY" + suffix;
-                String strDirKey = "DIR" + suffix;
+                String strDirKey = "DIR" + ((i <= 10) ? suffix : "_DEFAULT");
 
                 prefs.put(strHotkeyKey, mapKeyDirs.get(i).getHotkey());
                 prefs.put(strDirKey, mapKeyDirs.get(i).getDirectory());
@@ -439,6 +510,32 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
         System.exit(0);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void jMenuItemUndoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemUndoActionPerformed
+    
+        try{
+            if(undoList.size() > 0){
+                FileMoveRecord fmr = undoList.remove(undoList.size() - 1);
+
+                Path dest = fmr.getFrom();
+                List<Path> toList = fmr.getTo();
+
+                Path src = toList.get(0);
+                Files.move(src, dest, StandardCopyOption.REPLACE_EXISTING);
+                
+                System.out.println("UNDO: Moved " + src.toString() + " to " + dest.toString());
+                
+                if(toList.size()==2){
+                    Files.delete(toList.get(1));
+                    System.out.println("UNDO: Deleted " + toList.get(1).toString());
+                }
+                
+                refreshImageList();
+            }
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_jMenuItemUndoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -487,10 +584,12 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
     private javax.swing.JLabel jLabelNumImages;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenu jMenuConfigure;
+    private javax.swing.JMenu jMenuEdit;
     private javax.swing.JMenu jMenuFile;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItemSetClasses;
     private javax.swing.JMenuItem jMenuItemSetDirectories;
+    private javax.swing.JMenuItem jMenuItemUndo;
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 
@@ -533,9 +632,12 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
                     e.printStackTrace();
                 }
                 break;
-            case KeyEvent.VK_Z:
-                if (ke.isControlDown()) {
-                    System.out.println("Ctrl-Z typed");
+            case KeyEvent.VK_SPACE:
+            case KeyEvent.VK_ENTER:
+                try {
+                    moveImage(' ');
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
                 break;
             default:

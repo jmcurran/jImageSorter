@@ -25,6 +25,8 @@ public class HotkeyDirectoryPair {
     }
     
     public String getDirectory(){
+        if(strDirectory == null)
+            return "";
         return strDirectory;
     }
     

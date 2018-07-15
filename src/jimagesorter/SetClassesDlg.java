@@ -92,7 +92,8 @@ public class SetClassesDlg extends javax.swing.JDialog {
                 {"7", null},
                 {"8", null},
                 {"9", null},
-                {"0", null}
+                {"0", null},
+                {"default", null}
             },
             new String [] {
                 "Hotkey", "Directory"
@@ -131,7 +132,7 @@ public class SetClassesDlg extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonOK, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -146,7 +147,7 @@ public class SetClassesDlg extends javax.swing.JDialog {
         TableColumnModel jTableColumnModel = jTableClasses.getColumnModel();
         int width = jTableColumnModel.getTotalColumnWidth();
         int numCols = 2;
-        double[] ppnWidth = {0.15, 0.85};
+        double[] ppnWidth = {0.20, 0.80};
 
         for (int i = 0; i < numCols; i++) {
             TableColumn col = jTableColumnModel.getColumn(i);
@@ -163,9 +164,10 @@ public class SetClassesDlg extends javax.swing.JDialog {
         TableModel model = jTableClasses.getModel();
         Hotkeys = new ArrayList<>();
         
-        for(int row = 0; row < 10; row++){
+        for(int row = 0; row < 11; row++){
             HotkeyDirectoryPair hdp = (HotkeyDirectoryPair)mapKeyDirs.get(row + 1);
-            Hotkeys.add(hdp.getHotkey());
+            if(row <= 10)
+                Hotkeys.add(hdp.getHotkey());
             model.setValueAt(hdp.getHotkey(), row, 0);
             model.setValueAt(hdp.getDirectory(), row, 1);
         }
@@ -177,7 +179,7 @@ public class SetClassesDlg extends javax.swing.JDialog {
         String strHotkey = (String)model.getValueAt(row, 0);
         String strDirectory = (String)model.getValueAt(row, 1);
         
-        while(strDirectory != null & row < 10){
+        while(strDirectory != null & row < 11){
             try{
                 mapKeyDirs.put(row, new HotkeyDirectoryPair(strHotkey, strDirectory));
             }catch(InvalidHotkeyException e){
@@ -206,7 +208,7 @@ public class SetClassesDlg extends javax.swing.JDialog {
         int col = jTableClasses.getSelectedColumn();
         TableModel model = jTableClasses.getModel();
         
-        if(col == 0){
+        if(col == 0 && row < 10){
             String curHotkey = (String) model.getValueAt(row, col);
             HotkeyChooser dlg = new HotkeyChooser((JFrame)this.getParent(), true, 
                                                    curHotkey,
