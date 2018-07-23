@@ -28,10 +28,12 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
     String strFiledImageDirectory;
     boolean bFileClassifiedImages;
     List<File> imageFiles;
-    ListIterator<File> imageIterator;
+    ListIterator<File> imageQueueFileIterator;
+    ListIterator<File> imageFileIterator;
     TreeMap<String, ImageResult> imageInfo;
     File currentImageFile;
     List<FileMoveRecord> undoList;
+    Queue<BufferedImage> imageQueue;
 
     TreeMap<Integer, HotkeyDirectoryPair> mapKeyDirs;
     java.util.List<String> Hotkeys;
@@ -57,16 +59,18 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
         jLabelImageSourceDirectory.setText(strImageSourceDirectory);
 
         imageFiles = getImageList();
-        imageIterator = imageFiles.listIterator();
+        imageFileIterator = imageFiles.listIterator();
         String strLabel = "# Images: " + imageFiles.size();
         jLabelNumImages.setText(strLabel);
+        
+        imageQueue = initImageQueue();
 
         getImageInfo();
 
-        if (imageIterator.hasNext()) {
+        if (imageFileIterator.hasNext()) {
             BufferedImage theImage = null;
             try {
-                currentImageFile = imageIterator.next();
+                currentImageFile = imageFileIterator.next();
                 this.setTitle(currentImageFile.getName());
                 theImage = ImageIO.read(currentImageFile);
             } catch (IOException e) {
@@ -219,9 +223,28 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
         gl.replace(jPanel1, imagePanel);
         pack();
     }
+    
+    private Queue<BufferedImage> initImageQueue(){
+        Queue<BufferedImage> q = new LinkedList<>();
+        int numImagesToLoad = Math.min(imageFiles.size(), 10);
+        
+        int i = 0;
+        imageQueueFileIterator = imageFiles.listIterator();
+        while(i < numImagesToLoad && imageQueueFileIterator.hasNext()){
+            try{
+                BufferedImage im = ImageIO.read(imageQueueFileIterator.next());
+                q.add(im);
+                i++;
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+        }
+                
+        return q;
+    }
 
     private void deleteImage() throws IOException {
-        imageIterator.remove();
+        imageFileIterator.remove();
         updateFileCount();
         currentImageFile.delete();
         nextImage();
@@ -272,7 +295,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
                 
                 undoList.add(fmr);
 
-                imageIterator.remove();
+                imageFileIterator.remove();
                 updateFileCount();
                 nextImage();
             }
@@ -280,10 +303,10 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
     }
 
     private void nextImage() throws IOException {
-        if (imageIterator.hasNext()) {
+        if (imageFileIterator.hasNext()) {
             BufferedImage theImage = null;
             try {
-                currentImageFile = imageIterator.next();
+                currentImageFile = imageFileIterator.next();
                 this.setTitle(currentImageFile.getName());
                 theImage = ImageIO.read(currentImageFile);
             } catch (IOException e) {
@@ -301,10 +324,10 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
     }
 
     private void previousImage() throws IOException {
-        if (imageIterator.hasPrevious()) {
+        if (imageFileIterator.hasPrevious()) {
             BufferedImage theImage = null;
             try {
-                currentImageFile = imageIterator.previous();
+                currentImageFile = imageFileIterator.previous();
                 this.setTitle(currentImageFile.getName());
                 theImage = ImageIO.read(currentImageFile);
             } catch (IOException e) {
@@ -412,16 +435,16 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
     
     public void refreshImageList(){
         imageFiles = getImageList();            
-        imageIterator = imageFiles.listIterator();
+        imageFileIterator = imageFiles.listIterator();
         String strLabel = "# Images: " + imageFiles.size();
         jLabelNumImages.setText(strLabel);
 
         getImageInfo();
 
-        if(imageIterator.hasNext()){
+        if(imageFileIterator.hasNext()){
             BufferedImage theImage = null;
             try{
-                currentImageFile = imageIterator.next();
+                currentImageFile = imageFileIterator.next();
                 theImage = ImageIO.read(currentImageFile);
             }catch(IOException e){
                 e.printStackTrace();
@@ -459,16 +482,16 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
             jLabelImageSourceDirectory.setText(strImageSourceDirectory);
             
             imageFiles = getImageList();            
-            imageIterator = imageFiles.listIterator();
+            imageFileIterator = imageFiles.listIterator();
             String strLabel = "# Images: " + imageFiles.size();
             jLabelNumImages.setText(strLabel);
             
             getImageInfo();
 
-            if(imageIterator.hasNext()){
+            if(imageFileIterator.hasNext()){
                 BufferedImage theImage = null;
                 try{
-                    currentImageFile = imageIterator.next();
+                    currentImageFile = imageFileIterator.next();
                     theImage = ImageIO.read(currentImageFile);
                 }catch(IOException e){
                     e.printStackTrace();

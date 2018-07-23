@@ -5,12 +5,20 @@
  */
 package jimagesorter;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.*;
 
@@ -29,6 +37,8 @@ public class SetClassesDlg extends javax.swing.JDialog {
     TreeMap<Integer, HotkeyDirectoryPair> mapKeyDirs;
     String strCurrentDirectory;
     List<String> Hotkeys;
+    
+    private int defaultClassRow;
 
     /**
      * Creates new form SetClassesDlg
@@ -43,11 +53,17 @@ public class SetClassesDlg extends javax.swing.JDialog {
         
         super(parent, modal);
         initComponents();
+        
         this.strCurrentDirectory = strCurrentDirectory;
         resizeColumns();
+        setupRenderer();
+        
         mapKeyDirs = new TreeMap<>();
         mapKeyDirs.putAll(mapTableData);
         setTableData();
+        
+        // TODO: Change this to store in the preferences.
+        defaultClassRow = -1;
     }
 
     /**
@@ -111,6 +127,9 @@ public class SetClassesDlg extends javax.swing.JDialog {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jTableClassesMouseClicked(evt);
             }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                jTableClassesMouseReleased(evt);
+            }
         });
         jScrollPane1.setViewportView(jTableClasses);
 
@@ -158,6 +177,10 @@ public class SetClassesDlg extends javax.swing.JDialog {
 
     public TreeMap<Integer, HotkeyDirectoryPair> getData() {
         return mapKeyDirs;
+    }
+    
+    private void setupRenderer(){
+        jTableClasses.setDefaultRenderer(Object.class, new SetClassesTableRenderer(defaultClassRow));
     }
     
     private void setTableData() {
@@ -227,10 +250,12 @@ public class SetClassesDlg extends javax.swing.JDialog {
             }
             
         }else if (col == 1) {
+            
             JFileChooser fc;
+            String strCurrentDir = (String)model.getValueAt(row, col);
 
             fc = new JFileChooser();
-            fc.setCurrentDirectory(new File(strCurrentDirectory));
+            fc.setCurrentDirectory(new File(strCurrentDir));
             fc.setDialogTitle("Select the image directory");
             fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             fc.setFileFilter(new FileFilter() {
@@ -259,8 +284,41 @@ public class SetClassesDlg extends javax.swing.JDialog {
                 }
             }
         }
-
     }//GEN-LAST:event_jTableClassesMouseClicked
+
+    private void jTableClassesMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableClassesMouseReleased
+        int row = jTableClasses.rowAtPoint(evt.getPoint());
+        int col = jTableClasses.columnAtPoint(evt.getPoint());
+        
+        if(SwingUtilities.isRightMouseButton(evt)){
+            System.out.println("Here r=" + row + "c=" + col + " right-click?:" +  (SwingUtilities.isRightMouseButton(evt) ? "Yes" : "No"));
+              
+            JPopupMenu popupMenu = new JPopupMenu();
+            JMenuItem menuItemSetDefault = new JMenuItem("Set default");
+            JMenuItem menuItemClearDefault = new JMenuItem("Clear default");
+
+            menuItemSetDefault.addActionListener((ActionEvent ae) -> {
+                defaultClassRow = row;
+                ((SetClassesTableRenderer)jTableClasses.getDefaultRenderer(Object.class)).setDefaultClass(defaultClassRow);
+            });
+
+            menuItemClearDefault.addActionListener((ActionEvent ae) -> {
+                defaultClassRow = -1;
+                ((SetClassesTableRenderer)jTableClasses.getDefaultRenderer(Object.class)).setDefaultClass(defaultClassRow);
+            });
+
+            if(row == defaultClassRow || row == 10){
+                popupMenu.add(menuItemClearDefault);
+            }else{
+                popupMenu.add(menuItemSetDefault);
+            }
+            
+            if (evt.isPopupTrigger() && evt.getComponent() instanceof JTable ) {
+                System.out.println("Here");
+                popupMenu.show(jTableClasses, evt.getX(), evt.getY());
+            }
+        }
+    }//GEN-LAST:event_jTableClassesMouseReleased
 
     /**
          * @param args the command line arguments
