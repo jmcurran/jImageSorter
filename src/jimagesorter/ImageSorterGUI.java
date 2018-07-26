@@ -28,12 +28,10 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
     String strFiledImageDirectory;
     boolean bFileClassifiedImages;
     List<File> imageFiles;
-    ListIterator<File> imageQueueFileIterator;
     ListIterator<File> imageFileIterator;
     TreeMap<String, ImageResult> imageInfo;
     File currentImageFile;
     List<FileMoveRecord> undoList;
-    Queue<BufferedImage> imageQueue;
 
     TreeMap<Integer, HotkeyDirectoryPair> mapKeyDirs;
     java.util.List<String> Hotkeys;
@@ -63,8 +61,6 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
         String strLabel = "# Images: " + imageFiles.size();
         jLabelNumImages.setText(strLabel);
         
-        imageQueue = initImageQueue();
-
         getImageInfo();
 
         if (imageFileIterator.hasNext()) {
@@ -223,26 +219,7 @@ public class ImageSorterGUI extends javax.swing.JFrame implements KeyListener {
         gl.replace(jPanel1, imagePanel);
         pack();
     }
-    
-    private Queue<BufferedImage> initImageQueue(){
-        Queue<BufferedImage> q = new LinkedList<>();
-        int numImagesToLoad = Math.min(imageFiles.size(), 10);
-        
-        int i = 0;
-        imageQueueFileIterator = imageFiles.listIterator();
-        while(i < numImagesToLoad && imageQueueFileIterator.hasNext()){
-            try{
-                BufferedImage im = ImageIO.read(imageQueueFileIterator.next());
-                q.add(im);
-                i++;
-            }catch(IOException e){
-                e.printStackTrace();
-            }
-        }
-                
-        return q;
-    }
-
+  
     private void deleteImage() throws IOException {
         imageFileIterator.remove();
         updateFileCount();
